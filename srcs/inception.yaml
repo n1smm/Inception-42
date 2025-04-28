@@ -1,0 +1,169 @@
+services:
+  mariadb:
+    build:
+      context: ./mariadb/
+      dockerfile: DockerDb
+    image: my-db:3.20
+    container_name: mariadb
+    env_file: .env
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - inception-network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -u n1smm -p$$MYSQL_PASSWORD"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+  wordpress:
+    build:
+      context: ./wordpress/
+      dockerfile: DockerWordpress
+    image: my-wordpress:3.20
+    container_name: wordpress
+    env_file: .env
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - inception-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: on-failure
+  nginx:
+    build:
+      context: ./nginx/
+      dockerfile: DockerNginx
+    image: my-nginx:3.20
+    container_name: nginx
+    ports:
+      - "443:443"
+    extra_hosts:
+      - "tjuvan.42.fr:127.0.0.1"
+      - "www.tjuvan.42.fr:127.0.0.1"
+    networks:
+      - inception-network
+    volumes:
+      - wordpress_data:/var/www/html
+      - ssl_certs:/etc/ssl
+    restart: on-failure
+    depends_on:
+      - wordpress
+  redis:
+    build:
+      context: ./redis/
+      dockerfile: DockerRedis
+    image: my-redis:3.20
+    container_name: redis
+    env_file: .env
+    volumes:
+      - redis_data:/data
+    networks:
+      - inception-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+  ftp:
+    build:
+      context: ./ftp/
+      dockerfile: DockerFtp
+      args:
+        FTP_USER: "${FTP_USER}"
+        FTP_PASS: "${FTP_PASSWORD}"
+    image: my-ftp:3.20
+    container_name: ftp
+    env_file: .env
+    volumes:
+      - wordpress_data:/home/${FTP_USER}/ftp/files
+    ports:
+      - "21:21"
+      - "20:20"
+      - "40000-40005:40000-40005"
+    networks:
+      - inception-network
+    depends_on:
+      - wordpress
+    restart: on-failure
+  adminer:
+    build:
+      context: ./adminer/
+      dockerfile: DockerAdmin
+    image: my-adminer:3.20
+    container_name: adminer
+    ports:
+    - "7070:7070"
+    networks:
+    - inception-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: on-failure
+  portainer:
+    build:
+      context: ./portainer/
+      dockerfile: DockerUI
+    image: my-portainer:3.20
+    container_name: portainer
+    ports:
+      - "9443:9443"
+    networks:
+      - inception-network
+    volumes:
+      - portainer_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ssl_certs:/certs
+    restart: on-failure
+  website:
+    build:
+      context: ./website/
+      dockerfile: DockerNpm
+    image: my-webiste
+    container_name: website
+    ports:
+      - "3000:3000"
+    networks:
+      - inception-network
+    restart: on-failure
+
+volumes:
+  mariadb_data:
+    name: mariadb_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/nismm/data/mariadb
+  wordpress_data:
+    name: wordpress_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/nismm/data/wordpress
+  redis_data:
+    name: redis_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/nismm/data/redis
+  portainer_data:
+    name: portainer_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/nismm/data/portainer
+  ssl_certs: 
+    driver: local
+
+networks:
+  inception-network:
+    name: inception_network
+    driver: bridge

@@ -1,0 +1,22 @@
+FROM alpine:3.20
+
+RUN apk update && apk upgrade && \
+	apk add --no-cache \
+	redis su-exec gettext
+
+RUN set -xeu; \
+    addgroup -S redis || true; \
+    adduser -S -G redis redis || true
+
+run mkdir -p /data && \
+	chown -R redis:redis /data && \
+	chmod 770 /data
+
+COPY ./init/redis.conf.template /etc/redis.conf.template
+COPY ./init/startRedis.sh /startRedis.sh
+RUN chown redis:redis /etc/redis.conf
+RUN chmod +x /startRedis.sh
+
+EXPOSE 6379
+
+ENTRYPOINT [ "/startRedis.sh" ]

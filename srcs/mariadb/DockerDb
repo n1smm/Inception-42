@@ -1,0 +1,12 @@
+FROM alpine:3.20
+
+RUN apk update && apk add --no-cache mariadb mariadb-client mariadb-common openrc bash \
+				&& rm -rf /var/cache/apk/*
+
+
+COPY ./init/startingDb.sh /tmp/
+RUN chmod +x /tmp/startingDb.sh
+
+
+EXPOSE 3306
+ENTRYPOINT ["sh", "/tmp/startingDb.sh"]

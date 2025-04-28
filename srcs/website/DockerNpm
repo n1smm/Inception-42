@@ -1,0 +1,15 @@
+FROM alpine:3.20
+
+RUN apk update && apk upgrade \
+	&& apk add --no-cache nodejs npm
+
+COPY ./content/ /var/www/html/content/
+
+WORKDIR /var/www/html/content
+
+RUN npm install -g nodemon http-server
+RUN npm install 
+
+EXPOSE 3000
+CMD ["nodemon", "index.js" ]
+

@@ -1,0 +1,33 @@
+FROM portainer/portainer-ce:2.27.4-alpine
+
+# Create the mount-point directory for your certs
+RUN mkdir -p /certs
+
+# Expose HTTPS
+EXPOSE 9443
+
+
+# FROM alpine:3.20
+
+# # Install tools to fetch and unpack Portainer binary
+# RUN apk add --no-cache wget ca-certificates curl
+
+# ARG PORTAINER_VERSION=2.27.4
+# ENV PORTAINER_VERSION=${PORTAINER_VERSION}
+
+# WORKDIR /tmp
+# RUN wget -qO portainer.tar.gz \
+#       "https://github.com/portainer/portainer/releases/download/${PORTAINER_VERSION}/portainer-${PORTAINER_VERSION}-linux-amd64.tar.gz" \
+#   && tar xzf portainer.tar.gz \
+#   # The binary lives in ./portainer/portainer, so move *that* file:
+#   && mv portainer/portainer /usr/local/bin/portainer \
+#   && chmod +x /usr/local/bin/portainer \
+#   # clean up everything under /tmp
+#   && rm -rf /tmp/*
+  
+# RUN mkdir -p /certs
+
+# EXPOSE 9443
+ENTRYPOINT ["/portainer"]
+CMD ["--sslcert","/certs/certs/n1smm.crt", "--sslkey", "/certs/private/n1smm.key", "--bind-https",":9443"]
+

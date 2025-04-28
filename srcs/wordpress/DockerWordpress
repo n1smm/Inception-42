@@ -1,0 +1,41 @@
+FROM alpine:3.20
+
+# Install essential packages
+RUN apk update && apk upgrade && \
+    apk add --no-cache \
+		 php83 php83-fpm php83-tokenizer php83-phar php83-mysqli \
+    php83-curl php83-dom php83-mbstring php83-openssl \
+	php83-pcntl php83-posix \
+    curl mariadb-client su-exec redis
+
+RUN set -xeu; \
+    addgroup -S www-data || true; \
+    adduser -S -G www-data www-data || true
+
+# Configure PHP
+RUN echo "memory_limit = 256M" > /etc/php83/conf.d/custom.ini && \
+    echo "upload_max_filesize = 64M" >> /etc/php83/conf.d/custom.ini && \
+    echo "post_max_size = 64M" >> /etc/php83/conf.d/custom.ini
+
+# Configure PHP-FPM
+RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/g' /etc/php83/php-fpm.d/www.conf && \
+    sed -i 's/user = nobody/user = www-data/g' /etc/php83/php-fpm.d/www.conf && \
+    sed -i 's/group = nobody/group = www-data/g' /etc/php83/php-fpm.d/www.conf
+
+# Create user and set up workspace
+RUN  mkdir -p /var/www/html && \
+     chown -R www-data:www-data /var/www/html
+
+WORKDIR /var/www/html
+
+# Install WP-CLI
+RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x /usr/local/bin/wp
+
+COPY init/wp-start3.sh /wp-start3.sh
+RUN chmod +x /wp-start3.sh
+# Copy custom theme to container
+# COPY ./themes/ /var/www/html/wp-content/themes/
+
+ENTRYPOINT ["/wp-start3.sh"]
+CMD ["php-fpm83", "--nodaemonize"]

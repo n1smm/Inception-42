@@ -1,0 +1,37 @@
+# ftp/DockerFtp
+FROM alpine:3.20
+
+# → Declare build-time arguments
+ARG FTP_USER
+ARG FTP_PASS
+
+# (optional) propagate them into the image env if you need them in ENTRYPOINT
+ENV FTP_USER=${FTP_USER} \
+    FTP_PASS=${FTP_PASS}
+
+# 1) Install vsftpd + tools
+RUN apk update \
+ && apk add --no-cache vsftpd bash shadow \
+ && rm -rf /var/cache/apk/*
+
+# 2) Create group & user at build-time
+RUN set -xeu; \
+    addgroup -S "${FTP_USER}"; \
+    adduser  -S -G "${FTP_USER}" \
+             -h "/home/${FTP_USER}/ftp" \
+             -s /sbin/nologin "${FTP_USER}"; \
+    # this _will_ bake the password into the image layers
+    echo "${FTP_USER}:${FTP_PASS}" | chpasswd
+
+# 3) Copy config & entrypoint
+COPY ./init/vsftpd.conf    /etc/vsftpd.conf
+COPY ./init/ftpScript.sh   /usr/local/bin/ftpScript.sh
+RUN chmod +x /usr/local/bin/ftpScript.sh
+
+# 4) Expose ports & volume
+EXPOSE 21 20 40000-40005
+VOLUME ["/home/${FTP_USER}/ftp/files"]
+
+ENTRYPOINT ["ftpScript.sh"]
+CMD ["vsftpd", "/etc/vsftpd.conf"]
+
