@@ -7,17 +7,17 @@ help:  ## help menu
 
 # --- Main Commands ---
 build:  ## Only build containers
-	@ mkdir -p -m=666 /home/nismm/data/mariadb
-	@ mkdir -p -m=666 /home/nismm/data/wordpress
-	@ mkdir -p -m=666 /home/nismm/data/redis
-	@ mkdir -p -m=666 /home/nismm/data/portainer
+	@ mkdir -p -m=666 $HOME/data/mariadb
+	@ mkdir -p -m=666 $HOME/data/wordpress
+	@ mkdir -p -m=666 $HOME/data/redis
+	@ mkdir -p -m=666 $HOME/data/portainer
 	@$(DOCKER_COMPOSE) build
 
 up:  ## Start with build/rebuild
-	@ mkdir -p /home/nismm/data/mariadb
-	@ mkdir -p /home/nismm/data/wordpress
-	@ mkdir -p -m=666 /home/nismm/data/redis
-	@ mkdir -p -m=666 /home/nismm/data/portainer
+	@ mkdir -p $HOME/data/mariadb
+	@ mkdir -p $HOME/data/wordpress
+	@ mkdir -p -m=666 $HOME/data/redis
+	@ mkdir -p -m=666 $HOME/data/portainer
 	@$(DOCKER_COMPOSE) up -d --build
 
 down:  ## Stop and remove containers
@@ -32,7 +32,7 @@ fclean: clean ## remove volumes and build cache
 	@docker system prune -a --volumes -f
 
 clean_host_data: fclean ## removes host data; needs sudo
-	@ rm -rf /home/nismm/data
+	@ rm -rf $HOME/data
 
 
 # --- Checks and Monitoring ---

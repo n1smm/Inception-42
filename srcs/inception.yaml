@@ -123,7 +123,7 @@ services:
     build:
       context: ./website/
       dockerfile: DockerNpm
-    image: my-webiste
+    image: my-website
     container_name: website
     ports:
       - "3000:3000"
@@ -138,28 +138,28 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/nismm/data/mariadb
+      device: "${HOME}/data/mariadb"
   wordpress_data:
     name: wordpress_data
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/nismm/data/wordpress
+      device: "${HOME}/data/wordpress"
   redis_data:
     name: redis_data
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/nismm/data/redis
+      device: "${HOME}/data/redis"
   portainer_data:
     name: portainer_data
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/nismm/data/portainer
+      device: "${HOME}/data/portainer"
   ssl_certs: 
     driver: local
 
