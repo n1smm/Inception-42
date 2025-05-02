@@ -3,7 +3,7 @@
 > This Docker-driven suite complements a fully standalone NixOS build that can be run directly from USB or installed on any Linux-capable machine.
 > To explore the custom NixOS ISO and live-USB workflow, see `./etc/nixos/target-config/README.md`.  
 
-Inception leverages Docker Compose to deliver a self-contained stack—MariaDB, WordPress, Nginx, Redis, FTP, Adminer, Portainer, and a bespoke website—that can be spun up in seconds on any host. No additional setup is required beyond Docker and Docker Compose; everything you need travels with the containers, ensuring a consistent, portable environment whether you’re developing locally or deploying on new hardware.  
+Inception leverages Docker Compose to deliver a self-contained stack—MariaDB, WordPress, Nginx, Redis, FTP, Adminer, Portainer, and a simple website — that can be spun up in seconds on any host. No additional setup is required beyond Docker and Docker Compose; everything you need travels with the containers, ensuring a consistent, portable environment whether you’re developing locally or deploying on new hardware.  
 
 ### Download the latest Inception ISO here
 [ISO image](https://sourceforge.net/projects/inception-42/files/latest/download)
@@ -19,8 +19,8 @@ Inception leverages Docker Compose to deliver a self-contained stack—MariaDB, 
 
 Ensure Docker and Docker Compose are installed and that your user has permission to run Docker commands (or use `sudo`).
 
-For NixOS users, all the dependencies can be installed by running `nix-shell` in the root of the project.
-Note that this will limit permissions and sandbox the project.
+>For NixOS users, all the dependencies (besides docker which needs to bu run as service on host OS) can be installed by running `nix-shell` in the root of the project.
+>Note that this will limit permissions and sandbox the project.
 
 ---
 
@@ -29,8 +29,8 @@ Note that this will limit permissions and sandbox the project.
 1. **Clone the repository**:
 
    ```bash
-   git clone <repo-url>
-   cd inception2
+   git clone git@github.com:n1smm/Inception-42.git \
+   && cd Inception-42
    ```
 
 2. **Environment variables**:
